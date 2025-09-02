@@ -1,16 +1,18 @@
-# Private Git Tracking CLI 
+# Private Git Tracking CLI - Detailed Implementation Plan
 
 ## Table of Contents
 1. [Problem Statement](#problem-statement)
 2. [Solution Overview](#solution-overview)
 3. [Success Criteria](#success-criteria)
-4. [System Architecture](#system-architecture)
-5. [CLI Tool Specification](#cli-tool-specification)
-6. [Implementation Guidelines](#implementation-guidelines)
-7. [Deployment & Distribution](#deployment--distribution)
-8. [Testing Strategy](#testing-strategy)
-9. [Security Considerations](#security-considerations)
-10. [Future Enhancements](#future-enhancements)
+4. [Implementation Roadmap](#implementation-roadmap)
+5. [Detailed Phase Breakdown](#detailed-phase-breakdown)
+6. [Technology Stack & Dependencies](#technology-stack--dependencies)
+7. [Project Architecture](#project-architecture)
+8. [CLI Tool Specification](#cli-tool-specification)
+9. [Testing Strategy](#testing-strategy)
+10. [Build & Distribution](#build--distribution)
+11. [Security Considerations](#security-considerations)
+12. [Future Enhancements](#future-enhancements)
 
 ---
 
@@ -129,7 +131,857 @@ graph TB
 
 ---
 
-## System Architecture
+## Implementation Roadmap
+
+### 🎯 **Success Criteria Reminder**
+The CLI package should be:
+1. **Buildable** - Clean TypeScript compilation with strict mode
+2. **Globally Installable** - `npm install -g` and use anywhere in system
+3. **Functionally Complete** - Add files to private repo without affecting parent git
+4. **Git Command Compatible** - Support git status, log, add, commit in private repo
+5. **Cross-Platform** - Works on macOS, Linux, and Windows
+
+### 📋 **9-Phase Implementation Plan**
+
+Each phase builds incrementally toward the final goal, with individual testing and validation:
+
+```mermaid
+graph TD
+    A[Phase 1: Foundation] --> B[Phase 2: Core Services]
+    B --> C[Phase 3: Configuration]
+    C --> D[Phase 4: Basic Commands]
+    D --> E[Phase 5: File Operations]
+    E --> F[Phase 6: Git Commands]
+    F --> G[Phase 7: UX Polish]
+    G --> H[Phase 8: Testing]
+    H --> I[Phase 9: Distribution]
+    
+    style A fill:#e3f2fd
+    style D fill:#f3e5f5
+    style I fill:#e8f5e8
+```
+
+**Phase Priorities:**
+- **Phases 1-4**: MVP (Minimum Viable Product) - Basic functionality
+- **Phases 5-6**: Core Features - File management and git operations  
+- **Phases 7-9**: Production Ready - Polish, testing, and distribution
+
+---
+
+## Detailed Phase Breakdown
+
+### 🏗️ **Phase 1: Project Foundation & Infrastructure Setup**
+**Duration:** 1-2 days | **Risk:** Low | **Dependencies:** None
+
+#### **Objectives**
+- Set up TypeScript CLI project using CLI starter boilerplate
+- Configure strict TypeScript compilation
+- Establish code quality tooling (ESLint, Prettier)
+- Create basic CLI structure with Commander.js
+
+#### **Tasks**
+
+##### 1.1 Initialize CLI TypeScript Project
+```bash
+# Using CLI TypeScript starter as boilerplate
+npx create-cli-typescript private-git-cli
+cd private-git-cli
+```
+
+**Configuration Requirements:**
+```json
+// tsconfig.json - Strict TypeScript
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true
+  }
+}
+```
+
+##### 1.2 Configure Code Quality Tools
+```json
+// package.json dependencies
+{
+  "dependencies": {
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.0",
+    "simple-git": "^3.19.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/fs-extra": "^11.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  }
+}
+```
+
+##### 1.3 Basic CLI Structure
+```typescript
+// src/cli.ts - Entry point
+import { program } from 'commander';
+import chalk from 'chalk';
+
+program
+  .name('private')
+  .description('Private Git Tracking CLI')
+  .version('1.0.0');
+
+program
+  .command('init')
+  .description('Initialize private git tracking')
+  .action(() => {
+    console.log(chalk.green('✓ Initializing private git tracking...'));
+  });
+
+program.parse();
+```
+
+##### 1.4 Error Handling Foundation
+```typescript
+// src/errors/base.error.ts
+export abstract class BaseError extends Error {
+  abstract readonly code: string;
+  abstract readonly recoverable: boolean;
+  
+  constructor(message: string, public readonly details?: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] Project builds without TypeScript errors
+- [ ] `npm run build` succeeds
+- [ ] `npm run lint` passes without warnings
+- [ ] Basic CLI responds to `--version` and `--help`
+- [ ] Error classes are properly typed
+
+---
+
+### 🔧 **Phase 2: Core Infrastructure Services**
+**Duration:** 2-3 days | **Risk:** Medium | **Dependencies:** Phase 1
+
+#### **Objectives**
+- Platform detection for cross-platform support
+- File system service with atomic operations
+- Git service foundation with simple-git wrapper
+- Path resolution and validation utilities
+
+#### **Tasks**
+
+##### 2.1 Platform Detection Service
+```typescript
+// src/utils/platform.detector.ts
+export class PlatformDetector {
+  static isWindows(): boolean {
+    return process.platform === 'win32';
+  }
+  
+  static supportsSymlinks(): boolean {
+    // Check symbolic link capability
+  }
+  
+  static getPathSeparator(): string {
+    return this.isWindows() ? '\\' : '/';
+  }
+}
+```
+
+##### 2.2 File System Service
+```typescript
+// src/core/filesystem.service.ts
+export class FileSystemService {
+  async moveFileAtomic(source: string, target: string): Promise<void> {
+    // Implement atomic file moving
+  }
+  
+  async createDirectory(path: string): Promise<void> {
+    // Safe directory creation
+  }
+  
+  validatePath(path: string): boolean {
+    // Path validation and security checks
+  }
+}
+```
+
+##### 2.3 Git Service Foundation
+```typescript
+// src/core/git.service.ts
+import { simpleGit, SimpleGit } from 'simple-git';
+
+export class GitService {
+  private git: SimpleGit;
+  
+  constructor(private workingDir: string) {
+    this.git = simpleGit(workingDir);
+  }
+  
+  async isRepository(): Promise<boolean> {
+    // Check if directory is a git repository
+  }
+  
+  async getStatus(): Promise<GitStatus> {
+    // Get repository status
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] Platform detection works on all target OS
+- [ ] File operations are atomic and safe
+- [ ] Git service properly wraps simple-git
+- [ ] Path validation prevents security issues
+- [ ] Services have comprehensive unit tests
+
+---
+
+### ⚙️ **Phase 3: Configuration Management System**
+**Duration:** 2 days | **Risk:** Low | **Dependencies:** Phase 2
+
+#### **Objectives**
+- TypeScript interfaces for configuration
+- Zod schemas for runtime validation
+- Configuration file management
+- Migration support for version updates
+
+#### **Tasks**
+
+##### 3.1 Configuration Schema
+```typescript
+// src/types/config.types.ts
+export interface PrivateConfig {
+  version: string;
+  privateRepoPath: string;
+  storagePath: string;
+  trackedPaths: string[];
+  initialized: Date;
+  lastCleanup?: Date;
+  settings: ConfigSettings;
+}
+
+export interface ConfigSettings {
+  autoGitignore: boolean;
+  autoCleanup: boolean;
+  verboseOutput: boolean;
+}
+```
+
+##### 3.2 Zod Validation
+```typescript
+// src/core/config.schema.ts
+import { z } from 'zod';
+
+export const PrivateConfigSchema = z.object({
+  version: z.string(),
+  privateRepoPath: z.string(),
+  storagePath: z.string(),
+  trackedPaths: z.array(z.string()),
+  initialized: z.date(),
+  lastCleanup: z.date().optional(),
+  settings: z.object({
+    autoGitignore: z.boolean(),
+    autoCleanup: z.boolean(),
+    verboseOutput: z.boolean()
+  })
+});
+```
+
+##### 3.3 Configuration Manager
+```typescript
+// src/core/config.manager.ts
+export class ConfigManager {
+  async load(): Promise<PrivateConfig> {
+    // Load and validate configuration
+  }
+  
+  async save(config: PrivateConfig): Promise<void> {
+    // Save configuration with validation
+  }
+  
+  async migrate(oldVersion: string): Promise<void> {
+    // Handle configuration migration
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] Configuration validates against schema
+- [ ] Invalid configurations are rejected with clear errors
+- [ ] Configuration loading/saving works reliably
+- [ ] Migration system handles version changes
+- [ ] All edge cases are tested
+
+---
+
+### 🚀 **Phase 4: Basic Commands Implementation (MVP)**
+**Duration:** 3-4 days | **Risk:** Medium | **Dependencies:** Phase 3
+
+#### **Objectives**
+- Implement `private init` command
+- Create dual repository system
+- Basic `private status` command
+- Configuration validation functionality
+
+#### **Tasks**
+
+##### 4.1 Private Init Command
+```typescript
+// src/commands/init.command.ts
+export class InitCommand {
+  async execute(): Promise<CommandResult> {
+    // 1. Check if already initialized
+    // 2. Create .git-private/ directory
+    // 3. Create .private-storage/ with git repository
+    // 4. Generate .private-config.json
+    // 5. Update .gitignore
+    // 6. Create initial commit in private repo
+  }
+}
+```
+
+**Command Workflow:**
+```bash
+private init
+# Creates:
+# ├── .git-private/          # Private repository metadata
+# ├── .private-storage/      # Private files storage (git repo)
+# ├── .private-config.json   # Configuration
+# └── .gitignore            # Updated with exclusions
+```
+
+##### 4.2 Basic Status Command
+```typescript
+// src/commands/status.command.ts
+export class StatusCommand {
+  async execute(): Promise<CommandResult> {
+    // 1. Check main repository status
+    // 2. Check private repository status
+    // 3. Validate symbolic links
+    // 4. Display combined output
+  }
+}
+```
+
+**Expected Output:**
+```
+📋 Main Repository Status:
+  On branch main
+  Your branch is up to date with 'origin/main'
+  
+🔒 Private Repository Status:
+  On branch main
+  Changes not staged for commit:
+    modified: .env
+    modified: .private-rules/config.json
+```
+
+##### 4.3 Configuration Health Check
+```typescript
+// src/commands/health.command.ts
+export class HealthCommand {
+  async execute(): Promise<CommandResult> {
+    // 1. Validate configuration integrity
+    // 2. Check repository health
+    // 3. Verify symbolic links
+    // 4. Report issues and suggestions
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] `private init` creates complete dual repository system
+- [ ] Initialization fails gracefully if already initialized
+- [ ] `private status` shows both repository states
+- [ ] Configuration validation catches all error scenarios
+- [ ] Commands handle missing dependencies gracefully
+- [ ] All operations are atomic (succeed completely or fail cleanly)
+
+---
+
+### 📁 **Phase 5: File Management Operations (High Risk)**
+**Duration:** 3-4 days | **Risk:** High | **Dependencies:** Phase 4
+
+#### **Objectives**
+- Platform-specific symbolic link implementation
+- `private add <path>` command with file moving
+- Atomic operations with rollback capabilities
+- Safety mechanisms to prevent data loss
+
+#### **Tasks**
+
+##### 5.1 Symbolic Link Service
+```typescript
+// src/core/symlink.service.ts
+export class SymlinkService {
+  async create(source: string, target: string): Promise<void> {
+    if (PlatformDetector.isWindows()) {
+      // Use mklink /D for directories, mklink for files
+    } else {
+      // Use ln -s for Unix-like systems
+    }
+  }
+  
+  async validate(path: string): Promise<boolean> {
+    // Check if symbolic link is valid and points to correct target
+  }
+  
+  async repair(path: string): Promise<void> {
+    // Repair broken symbolic links
+  }
+}
+```
+
+##### 5.2 Private Add Command
+```typescript
+// src/commands/add.command.ts
+export class AddCommand {
+  async execute(path: string): Promise<CommandResult> {
+    // 1. Validate input path
+    // 2. Check if already tracked
+    // 3. Remove from main git index
+    // 4. Move to private storage (atomic)
+    // 5. Create symbolic link
+    // 6. Add to private git repository
+    // 7. Update configuration
+    // 8. Commit to private repo
+  }
+}
+```
+
+**Command Workflow:**
+```bash
+private add .env
+# 1. .env moved to .private-storage/.env
+# 2. .env@ symlink created (points to .private-storage/.env)
+# 3. .env removed from main git index
+# 4. .env added to private git repository
+# 5. Configuration updated with tracked path
+```
+
+##### 5.3 Atomic Operations
+```typescript
+// src/core/atomic.operations.ts
+export class AtomicFileOperation {
+  private rollbackActions: Array<() => Promise<void>> = [];
+  
+  async execute<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      await this.rollback();
+      throw error;
+    }
+  }
+  
+  addRollbackAction(action: () => Promise<void>): void {
+    this.rollbackActions.push(action);
+  }
+  
+  private async rollback(): Promise<void> {
+    // Execute rollback actions in reverse order
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] Symbolic links work correctly on all platforms
+- [ ] File moves are atomic (no partial states)
+- [ ] Rollback works correctly on operation failure
+- [ ] No data loss under any failure scenario
+- [ ] Configuration stays consistent with file system state
+- [ ] Main git repository is never polluted with private files
+
+---
+
+### 🔄 **Phase 6: Advanced Git Commands Implementation**
+**Duration:** 2-3 days | **Risk:** Medium | **Dependencies:** Phase 5
+
+#### **Objectives**
+- Complete git command interface for private repository
+- All standard git operations (commit, log, diff, branch, etc.)
+- Enhanced status reporting
+- System cleanup and repair functionality
+
+#### **Tasks**
+
+##### 6.1 Private Commit Command
+```typescript
+// src/commands/commit.command.ts
+export class CommitCommand {
+  async execute(message?: string): Promise<CommandResult> {
+    // 1. Check for changes in private repository
+    // 2. Stage all changes
+    // 3. Create commit with message
+    // 4. Update configuration metadata
+  }
+}
+```
+
+##### 6.2 Comprehensive Git Operations
+```typescript
+// src/commands/git.commands.ts
+export class PrivateGitCommands {
+  // Mirror standard git functionality for private repo
+  async log(options?: LogOptions): Promise<CommandResult> {}
+  async addChanges(all?: boolean): Promise<CommandResult> {}
+  async diff(options?: DiffOptions): Promise<CommandResult> {}
+  async branch(name?: string, create?: boolean): Promise<CommandResult> {}
+  async checkout(target: string): Promise<CommandResult> {}
+  async merge(branch: string): Promise<CommandResult> {}
+  async reset(options?: ResetOptions): Promise<CommandResult> {}
+}
+```
+
+**Complete Command Interface:**
+```bash
+# Basic operations
+private init                     # Initialize system
+private add <path>              # Add file to private tracking
+private status                  # Show both repo status
+private-status [-v]             # Show private repo status only
+
+# Git operations (private repo only)
+private commit [-m "message"]    # Commit private changes
+private log [--oneline] [-n 5]  # Show commit history  
+private add-changes [--all]     # Stage modifications
+private diff [--cached]         # Show differences
+private branch [name] [-b]      # Branch operations
+private checkout <branch>       # Switch branches
+private merge <branch>          # Merge branches
+private reset [--soft/--hard]   # Reset operations
+
+# Maintenance
+private cleanup                 # Fix issues and repair
+```
+
+##### 6.3 Enhanced Status Command
+```typescript
+// src/commands/status.enhanced.ts
+export class EnhancedStatusCommand {
+  async execute(verbose?: boolean): Promise<CommandResult> {
+    // Detailed reporting:
+    // - Repository health
+    // - Symbolic link integrity
+    // - Tracked files status
+    // - Configuration validation
+    // - Performance metrics
+  }
+}
+```
+
+##### 6.4 Cleanup Command
+```typescript
+// src/commands/cleanup.command.ts
+export class CleanupCommand {
+  async execute(force?: boolean): Promise<CommandResult> {
+    // 1. Repair broken symbolic links
+    // 2. Clean up git index issues
+    // 3. Validate and repair configuration
+    // 4. Remove orphaned files
+    // 5. Update .gitignore if needed
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] All git commands work only on private repository
+- [ ] No interference with main repository
+- [ ] Commands mirror standard git functionality
+- [ ] Enhanced status provides comprehensive information
+- [ ] Cleanup command repairs common issues automatically
+- [ ] All commands handle errors gracefully
+
+---
+
+### ✨ **Phase 7: Error Handling & User Experience**
+**Duration:** 2 days | **Risk:** Low | **Dependencies:** Phase 6
+
+#### **Objectives**
+- Comprehensive error handling with recovery suggestions
+- Input validation and security checks
+- User experience polish with progress indicators
+- Consistent colored output and formatting
+
+#### **Tasks**
+
+##### 7.1 Error Handling System
+```typescript
+// src/errors/error.handler.ts
+export class ErrorHandler {
+  static handle(error: BaseError): void {
+    console.error(chalk.red(`❌ ${error.message}`));
+    
+    if (error.details) {
+      console.error(chalk.gray(`   ${error.details}`));
+    }
+    
+    if (error.recoverable) {
+      console.log(chalk.yellow(`💡 Suggestion: ${this.getRecoverySuggestion(error)}`));
+    }
+    
+    process.exit(1);
+  }
+}
+```
+
+##### 7.2 Input Validation
+```typescript
+// src/utils/validator.ts
+export class InputValidator {
+  static validatePath(path: string): ValidationResult {
+    // Comprehensive path validation:
+    // - Exists and accessible
+    // - No path traversal attacks
+    // - Not system/protected files
+    // - Proper permissions
+  }
+  
+  static sanitizePath(path: string): string {
+    // Clean and normalize path
+  }
+}
+```
+
+##### 7.3 User Experience Enhancements
+```typescript
+// src/utils/ui.helpers.ts
+export class UIHelpers {
+  static showProgress(message: string): ProgressIndicator {
+    // Show spinner or progress bar
+  }
+  
+  static formatOutput(data: any, format: 'table' | 'list' | 'json'): string {
+    // Format output consistently
+  }
+  
+  static confirm(message: string): Promise<boolean> {
+    // Interactive confirmation prompts
+  }
+}
+```
+
+**✅ Acceptance Criteria:**
+- [ ] All error scenarios have specific handling
+- [ ] Error messages are actionable and clear
+- [ ] Input validation prevents security vulnerabilities
+- [ ] Progress indicators for long operations
+- [ ] Consistent colored output across all commands
+- [ ] Help text is comprehensive and helpful
+
+---
+
+### 🧪 **Phase 8: Testing & Quality Assurance**
+**Duration:** 2-3 days | **Risk:** Low | **Dependencies:** Phase 7
+
+#### **Objectives**
+- Comprehensive unit test suite (>90% coverage)
+- Integration tests for complete workflows
+- Cross-platform testing and validation
+- Performance testing and optimization
+
+#### **Tasks**
+
+##### 8.1 Unit Test Suite
+```typescript
+// tests/unit/config.manager.test.ts
+describe('ConfigManager', () => {
+  let configManager: ConfigManager;
+  let mockFs: MockFileSystem;
+
+  beforeEach(() => {
+    mockFs = new MockFileSystem();
+    configManager = new ConfigManager(mockFs);
+  });
+
+  it('should load valid configuration', async () => {
+    // Test implementation
+  });
+
+  it('should reject invalid configuration', async () => {
+    // Test implementation
+  });
+});
+```
+
+##### 8.2 Integration Tests
+```typescript
+// tests/integration/full.workflow.test.ts
+describe('Full Workflow Integration', () => {
+  it('should complete init -> add -> commit -> status workflow', async () => {
+    // 1. Initialize private system
+    // 2. Add files to private tracking
+    // 3. Commit changes
+    // 4. Verify status is correct
+    // 5. Validate file system state
+  });
+});
+```
+
+##### 8.3 Cross-Platform Testing
+```yaml
+# .github/workflows/test.yml
+name: Cross-Platform Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x]
+```
+
+##### 8.4 Documentation
+```markdown
+# README.md
+## Installation
+```bash
+npm install -g @private-git/cli
+```
+
+## Quick Start
+```bash
+# Initialize private tracking
+private init
+
+# Add files to private repository
+private add .env
+private add .private-config/
+
+# Work with private repository
+private status
+private commit -m "Add private configuration"
+private log --oneline
+```
+```
+
+**✅ Acceptance Criteria:**
+- [ ] >90% unit test coverage achieved
+- [ ] All integration tests pass
+- [ ] Cross-platform compatibility verified
+- [ ] Performance benchmarks meet requirements
+- [ ] Documentation is complete and accurate
+- [ ] Examples work as documented
+
+---
+
+### 📦 **Phase 9: Build & Distribution**
+**Duration:** 1-2 days | **Risk:** Low | **Dependencies:** Phase 8
+
+#### **Objectives**
+- Configure TypeScript build system
+- Set up NPM package for global installation
+- Test system-wide CLI functionality
+- Validate end-to-end functionality
+
+#### **Tasks**
+
+##### 9.1 Build Configuration
+```json
+// package.json
+{
+  "name": "@private-git/cli",
+  "version": "1.0.0",
+  "description": "Private file tracking with dual git repositories",
+  "bin": {
+    "private": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build && npm test",
+    "postinstall": "node dist/postinstall.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ]
+}
+```
+
+##### 9.2 Global Installation Setup
+```typescript
+// src/cli.ts
+#!/usr/bin/env node
+import { program } from 'commander';
+// ... rest of CLI implementation
+```
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "ES2020",
+    "module": "CommonJS"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests"]
+}
+```
+
+##### 9.3 Installation Testing
+```bash
+# Local testing
+npm run build
+npm link
+private --version  # Should work globally
+
+# Package testing
+npm pack
+npm install -g ./private-git-cli-1.0.0.tgz
+```
+
+##### 9.4 End-to-End Validation
+```bash
+# Create test project
+mkdir test-project && cd test-project
+git init
+echo "# Test Project" > README.md
+git add README.md
+git commit -m "Initial commit"
+
+# Test private CLI
+echo "SECRET_KEY=abc123" > .env
+private init
+private add .env
+private status
+private commit -m "Add environment variables"
+
+# Verify isolation
+git status  # Should not show .env
+private-status  # Should show .env in private repo
+```
+
+**✅ Final Success Criteria:**
+- [ ] ✅ **Buildable**: `npm run build` succeeds without errors
+- [ ] ✅ **Globally Installable**: `npm install -g` works and CLI is available system-wide
+- [ ] ✅ **Private File Management**: Can add files to private repo without affecting parent git
+- [ ] ✅ **Git Commands**: All git operations work on private repo (status, log, commit, etc.)
+- [ ] ✅ **Cross-Platform**: Works on macOS, Linux, and Windows
+- [ ] ✅ **Data Safety**: No data loss, atomic operations, proper rollback
+- [ ] ✅ **Production Ready**: Comprehensive error handling, validation, and documentation
+
+---
+
+## Technology Stack & Dependencies
 
 ### Directory Structure
 
@@ -741,3 +1593,91 @@ This specification defines a complete, production-ready CLI tool for private fil
 - **Distribution Plan**: Multiple installation methods
 
 This specification provides everything needed to build, test, deploy, and maintain a robust private file tracking solution that solves real-world developer challenges while maintaining the highest standards of security and reliability.
+
+---
+
+## Build & Distribution
+
+### **NPM Package Configuration**
+```json
+{
+  "name": "@private-git/cli",
+  "version": "1.0.0",
+  "description": "Private file tracking with dual git repositories",
+  "bin": {
+    "private": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": ["git", "private", "version-control", "cli", "typescript"]
+}
+```
+
+### **Global Installation Process**
+```bash
+# Build and test locally
+npm run build
+npm test
+
+# Link for local testing
+npm link
+private --version  # Should work globally
+
+# Package for distribution
+npm pack
+npm install -g ./private-git-cli-1.0.0.tgz
+
+# Publish to NPM
+npm publish
+```
+
+### **Cross-Platform Support**
+- **macOS**: Native symbolic links with `ln -s`
+- **Linux**: Full Unix symbolic link support
+- **Windows**: Directory junctions with `mklink /D`
+
+---
+
+## Next Steps
+
+### **Immediate Actions**
+1. **Start Phase 1**: Initialize CLI TypeScript project using starter boilerplate
+2. **Set up Development Environment**: Configure strict TypeScript, ESLint, Prettier
+3. **Create Task Tracking**: Use the detailed task breakdown provided above
+4. **Begin Implementation**: Follow the 9-phase plan systematically
+
+### **Key Milestones**
+- **Week 1-2**: Complete Phases 1-4 (MVP with basic init, add, status commands)
+- **Week 3**: Complete Phases 5-6 (File operations and git commands)
+- **Week 4**: Complete Phases 7-9 (Polish, testing, distribution)
+
+### **Success Validation**
+At completion, you should be able to:
+```bash
+# Install globally
+npm install -g @private-git/cli
+
+# Use anywhere in your system
+cd /any/git/project
+echo "SECRET=abc123" > .env
+private init
+private add .env
+private status
+private commit -m "Add environment variables"
+git status  # Should NOT show .env
+private-status  # Should show .env changes
+```
+
+This refined plan provides a clear, actionable roadmap to build a production-ready CLI tool that meets all your specified requirements using TypeScript strict mode and a CLI starter boilerplate.
