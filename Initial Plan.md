@@ -64,11 +64,11 @@ graph TB
     end
     
     subgraph "CLI Commands"
-        INIT["private init"]
-        ADD["private add <path>"]
-        STATUS["private status"]
-        COMMIT["private commit"]
-        CLEANUP["private cleanup"]
+        INIT["pgit init"]
+        ADD["pgit add <path>"]
+        STATUS["pgit status"]
+        COMMIT["pgit commit"]
+        CLEANUP["pgit cleanup"]
     end
     
     INIT --> PRIV
@@ -108,7 +108,7 @@ graph TB
 |-------------|----------------|--------------|
 | **File Location Preservation** | Symbolic links maintain original paths | Applications access files normally |
 | **Team Isolation** | .gitignore excludes all private components | `git status` shows no private files |
-| **Version Control** | Full git repository for private files | `private status` shows commit history |
+| **Version Control** | Full git repository for private files | `pgit status` shows commit history |
 | **Safety** | Automatic git index cleanup | Cannot accidentally commit private files |
 | **Cross-Platform** | OS detection + platform-specific commands | Works on macOS, Linux, Windows |
 
@@ -116,7 +116,7 @@ graph TB
 
 | Metric | Target | Achievement |
 |--------|--------|-------------|
-| **Status Visibility** | Independent repo status checking | ✅ `private status` + `private-status` commands |
+| **Status Visibility** | Independent repo status checking | ✅ `pgit status` + `pgit status` commands |
 | **Command Response** | < 2 seconds execution time | ✅ All commands execute quickly |
 | **Error Handling** | Graceful failure with clear messages | ✅ Comprehensive error handling |
 | **Workflow Integration** | Seamless developer experience | ✅ No disruption to existing git workflow |
@@ -184,8 +184,8 @@ graph TD
 ##### 1.1 Initialize CLI TypeScript Project
 ```bash
 # Using CLI TypeScript starter as boilerplate
-npx create-cli-typescript private-git-cli
-cd private-git-cli
+npx create-cli-typescript pgit-cli
+cd pgit-cli
 ```
 
 **Configuration Requirements:**
@@ -431,9 +431,9 @@ export class ConfigManager {
 **Duration:** 3-4 days | **Risk:** Medium | **Dependencies:** Phase 3
 
 #### **Objectives**
-- Implement `private init` command
+- Implement `pgit init` command
 - Create dual repository system
-- Basic `private status` command
+- Basic `pgit status` command
 - Configuration validation functionality
 
 #### **Tasks**
@@ -455,7 +455,7 @@ export class InitCommand {
 
 **Command Workflow:**
 ```bash
-private init
+pgit init
 # Creates:
 # ├── .git-private/          # Private repository metadata
 # ├── .private-storage/      # Private files storage (git repo)
@@ -503,9 +503,9 @@ export class HealthCommand {
 ```
 
 **✅ Acceptance Criteria:**
-- [ ] `private init` creates complete dual repository system
+- [ ] `pgit init` creates complete dual repository system
 - [ ] Initialization fails gracefully if already initialized
-- [ ] `private status` shows both repository states
+- [ ] `pgit status` shows both repository states
 - [ ] Configuration validation catches all error scenarios
 - [ ] Commands handle missing dependencies gracefully
 - [ ] All operations are atomic (succeed completely or fail cleanly)
@@ -517,7 +517,7 @@ export class HealthCommand {
 
 #### **Objectives**
 - Platform-specific symbolic link implementation
-- `private add <path>` command with file moving
+- `pgit add <path>` command with file moving
 - Atomic operations with rollback capabilities
 - Safety mechanisms to prevent data loss
 
@@ -564,7 +564,7 @@ export class AddCommand {
 
 **Command Workflow:**
 ```bash
-private add .env
+pgit add .env
 # 1. .env moved to .private-storage/.env
 # 2. .env@ symlink created (points to .private-storage/.env)
 # 3. .env removed from main git index
@@ -649,23 +649,23 @@ export class PrivateGitCommands {
 **Complete Command Interface:**
 ```bash
 # Basic operations
-private init                     # Initialize system
-private add <path>              # Add file to private tracking
-private status                  # Show both repo status
-private-status [-v]             # Show private repo status only
+pgit init                     # Initialize system
+pgit add <path>              # Add file to private tracking
+pgit status                  # Show both repo status
+pgit status [-v]             # Show private repo status only
 
 # Git operations (private repo only)
-private commit [-m "message"]    # Commit private changes
-private log [--oneline] [-n 5]  # Show commit history  
-private add-changes [--all]     # Stage modifications
-private diff [--cached]         # Show differences
-private branch [name] [-b]      # Branch operations
-private checkout <branch>       # Switch branches
-private merge <branch>          # Merge branches
-private reset [--soft/--hard]   # Reset operations
+pgit commit [-m "message"]    # Commit private changes
+pgit log [--oneline] [-n 5]  # Show commit history  
+pgit add-changes [--all]     # Stage modifications
+pgit diff [--cached]         # Show differences
+pgit branch [name] [-b]      # Branch operations
+pgit checkout <branch>       # Switch branches
+pgit merge <branch>          # Merge branches
+pgit reset [--soft/--hard]   # Reset operations
 
 # Maintenance
-private cleanup                 # Fix issues and repair
+pgit cleanup                 # Fix issues and repair
 ```
 
 ##### 6.3 Enhanced Status Command
@@ -850,22 +850,22 @@ jobs:
 # README.md
 ## Installation
 ```bash
-npm install -g @private-git/cli
+npm install -g @pgit/cli
 ```
 
 ## Quick Start
 ```bash
 # Initialize private tracking
-private init
+pgit init
 
 # Add files to private repository
-private add .env
-private add .private-config/
+pgit add .env
+pgit add .private-config/
 
 # Work with private repository
-private status
-private commit -m "Add private configuration"
-private log --oneline
+pgit status
+pgit commit -m "Add private configuration"
+pgit log --oneline
 ```
 ```
 
@@ -894,11 +894,11 @@ private log --oneline
 ```json
 // package.json
 {
-  "name": "@private-git/cli",
+  "name": "@pgit/cli",
   "version": "1.0.0",
   "description": "Private file tracking with dual git repositories",
   "bin": {
-    "private": "./dist/cli.js"
+    "pgit": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -942,11 +942,11 @@ import { program } from 'commander';
 # Local testing
 npm run build
 npm link
-private --version  # Should work globally
+pgit --version  # Should work globally
 
 # Package testing
 npm pack
-npm install -g ./private-git-cli-1.0.0.tgz
+npm install -g ./pgit-cli-1.0.0.tgz
 ```
 
 ##### 9.4 End-to-End Validation
@@ -960,14 +960,14 @@ git commit -m "Initial commit"
 
 # Test private CLI
 echo "SECRET_KEY=abc123" > .env
-private init
-private add .env
-private status
-private commit -m "Add environment variables"
+pgit init
+pgit add .env
+pgit status
+pgit commit -m "Add environment variables"
 
 # Verify isolation
 git status  # Should not show .env
-private-status  # Should show .env in private repo
+pgit status  # Should show .env in private repo
 ```
 
 **✅ Final Success Criteria:**
@@ -1015,27 +1015,27 @@ sequenceDiagram
     participant PRIV as Private Git
     
     Note over DEV,PRIV: Initialize System
-    DEV->>CLI: private init
+    DEV->>CLI: pgit init
     CLI->>FS: Create .private-storage/
     CLI->>PRIV: Initialize git repository
     CLI->>FS: Create .private-config.json
     CLI->>FS: Update .gitignore
     
     Note over DEV,PRIV: Add Private Files
-    DEV->>CLI: private add .private-rules
+    DEV->>CLI: pgit add .private-rules
     CLI->>FS: Move to .private-storage/
     CLI->>FS: Create symbolic link
     CLI->>MAIN: Remove from git index
     CLI->>PRIV: Add and commit
     
     Note over DEV,PRIV: Daily Workflow
-    DEV->>CLI: private status
+    DEV->>CLI: pgit status
     CLI->>MAIN: Get main repo status
     CLI->>PRIV: Get private repo status
     CLI->>DEV: Combined status report
     
     DEV->>FS: Edit private files (via symlinks)
-    DEV->>CLI: private commit -m "changes"
+    DEV->>CLI: pgit commit -m "changes"
     CLI->>PRIV: Commit to private repository
 ```
 
@@ -1090,18 +1090,18 @@ graph TD
 
 | Command | Purpose | Options | Example |
 |---------|---------|---------|---------|
-| `private init` | Initialize dual repository system | None | `private init` |
-| `private add <path>` | Add file/directory to private tracking | Path (required) | `private add .env` |
-| `private status` | Show both main and private repo status | None | `private status` |
-| `private-status` | Show detailed private repo status only | `--verbose`, `-v` | `private-status -v` |
-| `private commit` | Commit changes to private repository | `-m <message>` | `private commit -m "update"` |
-| `private cleanup` | Fix git status issues with private files | None | `private cleanup` |
+| `pgit init` | Initialize dual repository system | None | `pgit init` |
+| `pgit add <path>` | Add file/directory to private tracking | Path (required) | `pgit add .env` |
+| `pgit status` | Show both main and private repo status | None | `pgit status` |
+| `pgit status` | Show detailed private repo status only | `--verbose`, `-v` | `pgit status -v` |
+| `pgit commit` | Commit changes to private repository | `-m <message>` | `pgit commit -m "update"` |
+| `pgit cleanup` | Fix git status issues with private files | None | `pgit cleanup` |
 
 #### Command Details
 
 ##### 1. Initialize Command
 ```bash
-private init
+pgit init
 ```
 
 **Functionality:**
@@ -1119,7 +1119,7 @@ private init
 
 ##### 2. Add Command
 ```bash
-private add <path>
+pgit add <path>
 ```
 
 **Functionality:**
@@ -1138,9 +1138,9 @@ private add <path>
 
 ##### 3. Status Commands
 ```bash
-private status          # Both repositories
-private-status          # Private repository only
-private-status --verbose # Detailed private information
+pgit status          # Both repositories
+pgit status          # Private repository only
+pgit status --verbose # Detailed private information
 ```
 
 **Status Output Includes:**
@@ -1152,7 +1152,7 @@ private-status --verbose # Detailed private information
 
 ##### 4. Commit Command
 ```bash
-private commit -m "commit message"
+pgit commit -m "commit message"
 ```
 
 **Functionality:**
@@ -1163,7 +1163,7 @@ private commit -m "commit message"
 
 ##### 5. Cleanup Command
 ```bash
-private cleanup
+pgit cleanup
 ```
 
 **Functionality:**
@@ -1253,9 +1253,9 @@ private cleanup
 
 #### Project Structure
 ```
-private-git-cli/
+pgit-cli/
 ├── bin/
-│   └── private.js              # Main executable
+│   └── pgit.js              # Main executable
 ├── lib/
 │   ├── commands/              # Command implementations
 │   │   ├── init.js
@@ -1307,10 +1307,10 @@ private-git-cli/
 
 | Operation | Max Time | Measurement |
 |-----------|----------|-------------|
-| `private init` | 2 seconds | Directory creation + git init |
-| `private add` | 1 second per MB | File move + symlink creation |
-| `private status` | 500ms | Git status + symlink check |
-| `private commit` | 1 second | Git commit operation |
+| `pgit init` | 2 seconds | Directory creation + git init |
+| `pgit add` | 1 second per MB | File move + symlink creation |
+| `pgit status` | 500ms | Git status + symlink check |
+| `pgit commit` | 1 second | Git commit operation |
 
 ### Security Considerations
 
@@ -1341,11 +1341,11 @@ private-git-cli/
 #### NPM Package Structure
 ```json
 {
-  "name": "@private-git/cli",
+  "name": "@pgit/cli",
   "version": "1.0.0",
   "description": "Private file tracking with dual git repositories",
   "bin": {
-    "private": "./bin/private.js"
+    "pgit": "./bin/pgit.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -1358,13 +1358,13 @@ private-git-cli/
 
 1. **Global NPM Installation**
 ```bash
-npm install -g @private-git/cli
+npm install -g @pgit/cli
 ```
 
 2. **Project-Specific Installation**
 ```bash
-npm install --save-dev @private-git/cli
-npx private init
+npm install --save-dev @pgit/cli
+npx pgit init
 ```
 
 3. **Binary Distribution**
@@ -1601,11 +1601,11 @@ This specification provides everything needed to build, test, deploy, and mainta
 ### **NPM Package Configuration**
 ```json
 {
-  "name": "@private-git/cli",
+  "name": "@pgit/cli",
   "version": "1.0.0",
   "description": "Private file tracking with dual git repositories",
   "bin": {
-    "private": "./dist/cli.js"
+    "pgit": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -1633,11 +1633,11 @@ npm test
 
 # Link for local testing
 npm link
-private --version  # Should work globally
+pgit --version  # Should work globally
 
 # Package for distribution
 npm pack
-npm install -g ./private-git-cli-1.0.0.tgz
+npm install -g ./pgit-cli-1.0.0.tgz
 
 # Publish to NPM
 npm publish
@@ -1667,17 +1667,17 @@ npm publish
 At completion, you should be able to:
 ```bash
 # Install globally
-npm install -g @private-git/cli
+npm install -g @pgit/cli
 
 # Use anywhere in your system
 cd /any/git/project
 echo "SECRET=abc123" > .env
-private init
-private add .env
-private status
-private commit -m "Add environment variables"
+pgit init
+pgit add .env
+pgit status
+pgit commit -m "Add environment variables"
 git status  # Should NOT show .env
-private-status  # Should show .env changes
+pgit status  # Should show .env changes
 ```
 
 This refined plan provides a clear, actionable roadmap to build a production-ready CLI tool that meets all your specified requirements using TypeScript strict mode and a CLI starter boilerplate.
