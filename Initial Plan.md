@@ -850,7 +850,7 @@ jobs:
 # README.md
 ## Installation
 ```bash
-npm install -g @pgit/cli
+npm install -g pgit-cli
 ```
 
 ## Quick Start
@@ -894,7 +894,7 @@ pgit log --oneline
 ```json
 // package.json
 {
-  "name": "@pgit/cli",
+  "name": "pgit-cli",
   "version": "1.0.0",
   "description": "Private file tracking with dual git repositories",
   "bin": {
@@ -1341,7 +1341,7 @@ pgit-cli/
 #### NPM Package Structure
 ```json
 {
-  "name": "@pgit/cli",
+  "name": "pgit-cli",
   "version": "1.0.0",
   "description": "Private file tracking with dual git repositories",
   "bin": {
@@ -1358,12 +1358,12 @@ pgit-cli/
 
 1. **Global NPM Installation**
 ```bash
-npm install -g @pgit/cli
+npm install -g pgit-cli
 ```
 
 2. **Project-Specific Installation**
 ```bash
-npm install --save-dev @pgit/cli
+npm install --save-dev pgit-cli
 npx pgit init
 ```
 
@@ -1601,7 +1601,7 @@ This specification provides everything needed to build, test, deploy, and mainta
 ### **NPM Package Configuration**
 ```json
 {
-  "name": "@pgit/cli",
+  "name": "pgit-cli",
   "version": "1.0.0",
   "description": "Private file tracking with dual git repositories",
   "bin": {
@@ -1667,7 +1667,7 @@ npm publish
 At completion, you should be able to:
 ```bash
 # Install globally
-npm install -g @pgit/cli
+npm install -g pgit-cli
 
 # Use anywhere in your system
 cd /any/git/project
