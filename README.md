@@ -35,15 +35,15 @@ Your Project Structure:
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g @pgit-git/cli
+npm install -g pgit-cli
 ```
 
 ### Local Development Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/pgit-git-cli.git
-cd pgit-git-cli
+git clone https://github.com/jack-sparrow-1904/pgit-cli.git
+cd pgit-cli
 
 # Install dependencies
 npm install
@@ -258,8 +258,8 @@ We welcome contributions to the Private Git Tracking CLI! Here's how you can hel
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/your-username/pgit-git-cli.git
-   cd pgit-git-cli
+   git clone https://github.com/your-username/pgit-cli.git
+   cd pgit-cli
    ```
 
 2. **Install Dependencies**
@@ -437,17 +437,17 @@ We are committed to providing a welcoming and inclusive environment for all cont
 ### Getting Help
 
 **📞 Questions?**
-- Open a [Discussion](https://github.com/your-org/pgit-git-cli/discussions)
+- Open a [Discussion](https://github.com/jack-sparrow-1904/pgit-cli/discussions)
 - Join our [Discord community](https://discord.gg/your-server)
-- Check the [Wiki](https://github.com/your-org/pgit-git-cli/wiki)
+- Check the [Wiki](https://github.com/jack-sparrow-1904/pgit-cli/wiki)
 
 **🐛 Found a Bug?**
-- Open an [Issue](https://github.com/your-org/pgit-git-cli/issues)
+- Open an [Issue](https://github.com/jack-sparrow-1904/pgit-cli/issues)
 - Include reproduction steps
 - Specify your operating system and Node.js version
 
 **💡 Feature Ideas?**
-- Open a [Feature Request](https://github.com/your-org/pgit-git-cli/issues/new?template=feature_request.md)
+- Open a [Feature Request](https://github.com/jack-sparrow-1904/pgit-cli/issues/new?template=feature_request.md)
 - Describe the use case and expected behavior
 - Discuss implementation approach
 
